@@ -29,7 +29,15 @@ jobs:
         sed -i 's/package.name = myapp/package.name = grapenotes/g' buildozer.spec
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
         sed -i 's/requirements = python3,kivy/requirements = python3,kivy/g' buildozer.spec
+        
+        # Фиксируем стабильную версию Android SDK Build-Tools и включаем автоприем лицензий
+        sed -i 's/# android.build_tools_version = 28.0.3/android.build_tools_version = 34.0.0/g' buildozer.spec
         echo "android.accept_sdk_licenses = True" >> buildozer.spec
+
+    - name: Accept Android Licenses Pre-build
+      run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        yes | sdkmanager --sdk_root=/home/runner/.buildozer/android/platform/android-sdk --licenses || true
 
     - name: Build APK with Buildozer
       run: |
