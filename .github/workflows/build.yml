@@ -33,11 +33,22 @@ jobs:
         sed -i 's/package.name = myapp/package.name = grapenotes/g' buildozer.spec
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
         sed -i 's/^requirements = .*/requirements = python3==3.10.12, kivy, charset-normalizer/g' buildozer.spec
-        echo "android.accept_sdk_licenses = True" >> buildozer.spec
+        
+        # Фиксируем стабильную версию Android API и Build-tools
+        sed -i 's/# android.api = 33/android.api = 33/g' buildozer.spec
+        sed -i 's/# android.build_tools_version = .*/android.build_tools_version = 33.0.2/g' buildozer.spec
+        sed -i 's/# android.accept_sdk_licenses = False/android.accept_sdk_licenses = True/g' buildozer.spec
+
+    # Автоматическое принятие всех лицензий Android SDK
+    - name: Accept Android SDK Licenses
+      run: |
+        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+        yes | android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
 
     - name: Build APK with Buildozer
       run: |
-        buildozer -v android debug
+        yes | buildozer -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
