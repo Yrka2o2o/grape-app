@@ -7,15 +7,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/kivy/buildozer:master
+      image: kivy/buildozer:latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Fix directory permissions
+    - name: Fix Directory Permissions
       run: |
-        git config --global --add safe.directory /__w/grape-app/grape-app
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
     - name: Initialize Buildozer
       run: |
