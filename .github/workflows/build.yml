@@ -20,7 +20,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
-        pip install --upgrade buildozer cython
+        pip install --upgrade buildozer cython virtualenv
 
     - name: Initialize Buildozer
       run: |
@@ -30,14 +30,15 @@ jobs:
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
         sed -i 's/requirements = python3,kivy/requirements = python3,kivy/g' buildozer.spec
         
-        # Фиксируем стабильную версию Android SDK Build-Tools и включаем автоприем лицензий
-        sed -i 's/# android.build_tools_version = 28.0.3/android.build_tools_version = 34.0.0/g' buildozer.spec
+        # Фиксируем версии и включаем автоприем лицензий
         echo "android.accept_sdk_licenses = True" >> buildozer.spec
+        echo "android.api = 34" >> buildozer.spec
+        echo "android.build_tools_version = 34.0.0" >> buildozer.spec
 
-    - name: Accept Android Licenses Pre-build
+    - name: Accept Android Licenses Manually
       run: |
         mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-        yes | sdkmanager --sdk_root=/home/runner/.buildozer/android/platform/android-sdk --licenses || true
+        echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
 
     - name: Build APK with Buildozer
       run: |
