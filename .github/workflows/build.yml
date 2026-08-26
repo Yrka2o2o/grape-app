@@ -22,9 +22,6 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-
     - name: Install System Dependencies
       run: |
         sudo apt-get update
@@ -39,37 +36,20 @@ jobs:
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
         sed -i 's/requirements = python3,kivy/requirements = python3,kivy/g' buildozer.spec
         
-        # Настраиваем путь к установленной системе Android SDK
-        echo "android.accept_sdk_licenses = True" >> buildozer.spec
-        echo "android.sdk_path = $ANDROID_HOME" >> buildozer.spec
+        # Жёстко фиксируем версии SDK и Build-Tools, чтобы не качалась нестабильная 37 версий
+        sed -i 's/# android.api = 31/android.api = 33/g' buildozer.spec
+        sed -i 's/# android.build_tools_version = 28.0.3/android.build_tools_version = 33.0.2/g' buildozer.spec
+        sed -i 's/# android.accept_sdk_licenses = False/android.accept_sdk_licenses = True/g' buildozer.spec
 
-    - name: Build APK with Buildozer
+    - name: Pre-accept Android SDK Licenses
       run: |
-        buildozer -v android debug
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: GrapeNotes-APK
-        path: bin/*.apk
-    - name: Accept Android Licenses Manually
-      run: |
+        # Создаем структуры каталогов лицензий для Buildozer
         mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-        echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-
-    - name: Build APK with Buildozer
-      run: |
-        buildozer -v android debug
-
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: GrapeNotes-APK
-        path: bin/*.apk
-    - name: Accept Android Licenses Manually
-      run: |
-        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-        echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        
+        # Подкладываем хэши принятых лицензий Android SDK
+        echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        echo -e "\nd56f5187479451eabf01fb78af6dfcb131a6481e" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
 
     - name: Build APK with Buildozer
       run: |
