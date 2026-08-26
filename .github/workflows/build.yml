@@ -19,7 +19,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential ccache git libncurses5:i386 zip unzip zlib1g-dev libssl-dev libffi-dev libltdl-dev openjdk-17-jdk
+        sudo apt-get install -y build-essential ccache git zip unzip zlib1g-dev libssl-dev libffi-dev libltdl-dev openjdk-17-jdk libncurses5
 
     - name: Install Buildozer and Cython
       run: |
