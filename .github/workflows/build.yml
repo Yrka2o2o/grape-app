@@ -5,37 +5,39 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container:
-      image: kivy/buildozer:latest
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Fix Directory Permissions
-      run: |
-        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
 
-    - name: Initialize Buildozer
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ccache git libncurses5:i386 zip unzip zlib1g-dev libssl-dev libffi-dev libltdl-dev openjdk-17-jdk
+
+    - name: Install Buildozer and Cython
+      run: |
+        python -m pip install --upgrade pip
+        pip install "cython<3.0.0" buildozer
+
+    - name: Initialize and configure Buildozer
       run: |
         yes | buildozer init
         sed -i 's/title = My Application/title = Grape Notes/g' buildozer.spec
         sed -i 's/package.name = myapp/package.name = grapenotes/g' buildozer.spec
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
-        # Фиксируем версию python3 и hostpython3 на 3.11.0, чтобы избежать конфликтов Python 3.14
-        sed -i 's/^requirements = .*/requirements = python3==3.11.0, hostpython3==3.11.0, kivy, charset-normalizer/g' buildozer.spec
+        sed -i 's/^requirements = .*/requirements = python3==3.10.12, kivy, charset-normalizer/g' buildozer.spec
         echo "android.accept_sdk_licenses = True" >> buildozer.spec
-
-    # Очищаем кэш buildozer внутри контейнера перед сборкой
-    - name: Clear Buildozer Cache
-      run: |
-        rm -rf ~/.buildozer
-        rm -rf .buildozer
 
     - name: Build APK with Buildozer
       run: |
-        yes | buildozer -v android debug
+        buildozer -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
