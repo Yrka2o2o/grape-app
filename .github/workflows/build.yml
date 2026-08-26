@@ -19,7 +19,7 @@ jobs:
 
     - name: Initialize Buildozer
       run: |
-        buildozer init
+        buildozer --warn_on_root=0 init
         sed -i 's/title = My Application/title = Grape Notes/g' buildozer.spec
         sed -i 's/package.name = myapp/package.name = grapenotes/g' buildozer.spec
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
@@ -28,7 +28,7 @@ jobs:
 
     - name: Build APK with Buildozer
       run: |
-        buildozer -v android debug
+        buildozer --warn_on_root=0 -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
