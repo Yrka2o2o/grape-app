@@ -34,10 +34,18 @@ jobs:
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
         sed -i 's/^requirements = .*/requirements = python3==3.10.12, kivy, charset-normalizer/g' buildozer.spec
         
-        # Фиксируем поддерживаемую версию SDK и авто-принятие лицензий
-        sed -i 's/# android.api = 33/android.api = 33/g' buildozer.spec
-        sed -i 's/# android.build_tools_version = .*/android.build_tools_version = 33.0.2/g' buildozer.spec
+        # Обновляем API до 34 и отключаем жесткую привязку к старым build-tools
+        sed -i 's/# android.api = 31/android.api = 34/g' buildozer.spec
+        sed -i 's/android.api = 33/android.api = 34/g' buildozer.spec
+        sed -i 's/# android.minapi = 21/android.minapi = 24/g' buildozer.spec
         sed -i 's/# android.accept_sdk_licenses = False/android.accept_sdk_licenses = True/g' buildozer.spec
+
+    # Принудительная предустановка build-tools и aidl до запуска сборки
+    - name: Pre-install Android Build-Tools
+      run: |
+        buildozer android debug || true
+        mkdir -p ~/.buildozer/android/platform/android-sdk/build-tools/34.0.0
+        yes | ~/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-34" || true
 
     - name: Build APK with Buildozer
       run: |
