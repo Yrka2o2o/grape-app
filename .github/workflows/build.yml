@@ -23,8 +23,15 @@ jobs:
         sed -i 's/title = My Application/title = Grape Notes/g' buildozer.spec
         sed -i 's/package.name = myapp/package.name = grapenotes/g' buildozer.spec
         sed -i 's/package.domain = org.test/package.domain = org.grape/g' buildozer.spec
-        sed -i 's/requirements = python3,kivy/requirements = python3,kivy/g' buildozer.spec
+        # Фиксируем версию python3 и hostpython3 на 3.11.0, чтобы избежать конфликтов Python 3.14
+        sed -i 's/^requirements = .*/requirements = python3==3.11.0, hostpython3==3.11.0, kivy, charset-normalizer/g' buildozer.spec
         echo "android.accept_sdk_licenses = True" >> buildozer.spec
+
+    # Очищаем кэш buildozer внутри контейнера перед сборкой
+    - name: Clear Buildozer Cache
+      run: |
+        rm -rf ~/.buildozer
+        rm -rf .buildozer
 
     - name: Build APK with Buildozer
       run: |
